@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // colocando mongoose no arquivo
 
-mongoose.connect('mongodb://localhost/noderest');
+mongoose.connect('mongodb://localhost/noderest'); 
 mongoose.Promise = global.Promise;
 
-module.exports = mongoose;
+module.exports = mongoose; // exportando o mongoose

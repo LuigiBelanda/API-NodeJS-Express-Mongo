@@ -1,6 +1,7 @@
 const mongoose = require('../database');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs'); // biblioteca para fazer a criptografia da senha
 
+// criando abaixo o modelo de cadastro de usuário, colocando quais dados queremos, seus tipos etc.
 const UserSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -23,6 +24,7 @@ const UserSchema = new mongoose.Schema({
     },
 });
 
+// antes de salvar o user criptografamos a senha 
 UserSchema.pre('save', async function(next) {
     const hash = await bcrypt.hash(this.password, 10);
     this.password = hash;
@@ -30,6 +32,6 @@ UserSchema.pre('save', async function(next) {
     next();
 });
 
-const User = mongoose.model('User', UserSchema);
+const User = mongoose.model('User', UserSchema); // atribuimos ao "User" nosso modelo de cadastro, passando como paramêtro o nome e schema
 
-module.exports = User;
+module.exports = User; // exportando o User para ser usado em outros arquivos
