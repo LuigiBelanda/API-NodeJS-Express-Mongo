@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        select: false,
+        select: false, // com o select "false" quando fizermos uma busca no banco ele não trará o campo password
     },
     createdAt: {
         type: Date,

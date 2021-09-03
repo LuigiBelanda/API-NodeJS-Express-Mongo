@@ -13,6 +13,8 @@ app.get('/', (req, res) => {
 
 require('./controllers/authController')(app);
 // carregando o aquivo acima "authController" e passando "app" como paramêtro
+require('./controllers/projectController')(app);
+// carregando o aquivo acima "projectController" e passando "app" como paramêtro
 
 app.listen(3000);
 // colando o app para rodar na porta 3000
