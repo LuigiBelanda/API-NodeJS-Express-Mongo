@@ -1,4 +1,4 @@
-const mongoose = require('../database');
+const mongoose = require('../../database');
 const bcrypt = require('bcryptjs'); // biblioteca para fazer a criptografia da senha
 
 // criando abaixo o modelo de cadastro de usuário, colocando quais dados queremos, seus tipos etc.
@@ -17,6 +17,14 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
         select: false, // com o select "false" quando fizermos uma busca no banco ele não trará o campo password
+    },
+    passwordResetToken: {
+        type: String,
+        select: false,
+    },
+    passwordResetExpires: {
+        type: Date,
+        select: false,
     },
     createdAt: {
         type: Date,

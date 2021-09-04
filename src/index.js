@@ -11,10 +11,7 @@ app.get('/', (req, res) => {
 });
 // sempre que a requisião foi feita no http://localhost:3000/ ele irá retornan um "OK"
 
-require('./controllers/authController')(app);
-// carregando o aquivo acima "authController" e passando "app" como paramêtro
-require('./controllers/projectController')(app);
-// carregando o aquivo acima "projectController" e passando "app" como paramêtro
+require('./app/controllers/index')(app);
 
 app.listen(3000);
 // colando o app para rodar na porta 3000

@@ -1,8 +1,10 @@
 const express = require('express'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const mailer = require('../../modules/mailer');
 
-const authConfig = require('../config/auth.json');
+const authConfig = require('../../config/auth.json');
 
 const User = require('../models/user'); 
 // pegando o "User" que criamos na pasta models
@@ -74,6 +76,85 @@ router.post('/authenticate', async (req, res) => {
             token: generateToken({ id:user.id }),
             // chamando a função para gerar o token passando como paramêtro o id do usuário
         });  
+    }
+});
+
+// criando a rota para recuperação de senha, envio do token e expiração
+router.post('/forgot_password', async (req, res) => {
+    // abaixo pegamos o email que vier no corpo da req, no caso o email que será usado pelo user
+    const { email } = req.body;
+
+    // abaixo vamos ver se existe algum user com o email que foi passado
+    try {
+        const user = await User.findOne({ email });
+
+        // caso user não exista, não tenha nenhum valor, retornamos o erro abaixo
+        if(!user){
+            return res.status(400).send({ error: 'user not found' });
+        }
+
+        const token = crypto.randomBytes(20).toString('hex');
+        const now = new Date();
+        now.setHours(now.getHours() + 1);
+
+        await User.findByIdAndUpdate(user.id, {
+            // $set representa quais campos queremos setar
+            '$set': {
+                passwordResetToken: token,
+                passwordResetExpires: now,
+            }
+        });
+
+        // console.log(token, now);
+
+        mailer.sendMail({
+            to: email,
+            from: 'luigi.belanda.milani@gmail.com',
+            template: 'auth/forgot_password',
+            context: { token },
+        }, (err) => {
+            if(err) {
+                return res.status(400).send({ error: 'Cannot send forgot password email' });
+            }
+
+            return res.send();
+        });
+    } catch (err) {
+        res.status(400).send({ error: 'Erro on forgot password, try again' });
+    }
+});
+
+// criando a rota para redefinir a senha
+router.post('/reset_password', async (req, res) => {
+    const { email, token, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email })
+        .select('+passwordResetToken passwordResetExpires');
+
+        // caso user não exista, não tenha nenhum valor, retornamos o erro abaixo
+        if(!user){
+            return res.status(400).send({ error: 'user not found' });
+        }
+
+        if(token !== user.passwordResetToken){
+            return res.status(400).send({ error: 'Token invalid' });
+        }
+
+        const now = new Date();
+
+        if(now > user.passwordResetExpires){
+            res.status(400).send({ error: 'Token expires, generate a new one' });
+        }
+
+        user.password = password;
+
+        await user.save()
+
+        res.send();
+
+    } catch (err) {
+        res.status(400).send({ error: 'Cannot reset password, try again' });
     }
 });
 
